@@ -11,4 +11,5 @@ export const client = createClient({
   stega: {
     studioUrl: `${baseUrl}/studio`,
   },
+  token: process.env.SANITY_API_TOKEN, // ✅ ADD THIS LINE
 });
