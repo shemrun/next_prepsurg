@@ -36,7 +36,7 @@ export default defineConfig({
   beta: {
     create: {
       startInCreateEnabled: true,
-      fallbackStudioOrigin: "lms-papafam.sanity.studio",
+      fallbackStudioOrigin: "lms-prepsurg.sanity.studio",
     },
   },
 });
