@@ -27,20 +27,24 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # Install dependencies with retry logic for npm registry issues
+      # Install dependencies with built-in retry logic
       - name: Install Dependencies
-        run: npm ci --legacy-peer-deps
-        env:
-          npm_config_registry: https://registry.npmjs.org/
-        continue-on-error: true
-      
-      # Retry if npm registry had issues
-      - name: Retry Install on Failure
-        if: failure()
         run: |
-          echo "First install failed, retrying..."
-          sleep 10
-          npm ci --legacy-peer-deps
+          # Retry up to 3 times if npm install fails (handles registry issues)
+          for i in 1 2 3; do
+            echo "Attempt $i: Installing dependencies..."
+            if npm ci --legacy-peer-deps; then
+              echo "✅ Dependencies installed successfully"
+              break
+            else
+              if [ $i -eq 3 ]; then
+                echo "❌ Failed after 3 attempts"
+                exit 1
+              fi
+              echo "⚠️ Attempt $i failed, waiting 30 seconds before retry..."
+              sleep 30
+            fi
+          done
 
       # Build the application
       - name: Build Application
@@ -64,7 +68,7 @@ jobs:
           app_location: "/"
           api_location: ""
           output_location: ".next"
-          skip_app_build: true  # We already built above
+          skip_app_build: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
